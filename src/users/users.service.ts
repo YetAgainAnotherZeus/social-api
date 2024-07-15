@@ -3,8 +3,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Repository } from "typeorm";
 import { User } from "./user.entity";
 import { SignupDto } from "./dto/signup.dto";
-import { UserAlreadyExistsError } from "./error";
-import { hashPassword } from "./password.helper";
+import { UserAlreadyExistsError, InvalidCredentialsError } from "./error";
+import { hashPassword, matchPassword } from "./password.helper";
 
 @Injectable()
 export class UsersService {
@@ -25,6 +25,25 @@ export class UsersService {
         user.password = await hashPassword(signupDto.password);
 
         return this.usersRepository.save(user);
+    }
+
+    public async signin(signinDto: SignupDto): Promise<User> {
+        const user = await this._findByAttr("name", signinDto.name);
+
+        if (!user) {
+            throw new InvalidCredentialsError();
+        }
+
+        const isPasswordValid = await matchPassword(
+            signinDto.password,
+            user.password,
+        );
+
+        if (!isPasswordValid) {
+            throw new InvalidCredentialsError();
+        }
+
+        return user;
     }
 
     public async getAll(): Promise<User[]> {
