@@ -5,6 +5,17 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { NewPostDto } from "./dto/new-post.dto";
 import { User } from "src/users/user.entity";
 
+const POST_SELECT_FILTER = {
+    id: true,
+    content: true,
+    createdAt: true,
+    updatedAt: true,
+    author: {
+        id: true,
+        name: true,
+    },
+};
+
 @Injectable()
 export class PostsService {
     constructor(
@@ -14,6 +25,17 @@ export class PostsService {
         private readonly postsRepository: Repository<Post>,
     ) {}
 
+    async getAll(page: number = 1, perPage: number = 10) {
+        return await this.postsRepository.find({
+            skip: (page - 1) * perPage,
+            take: perPage,
+            relations: {
+                author: true,
+            },
+            select: POST_SELECT_FILTER,
+        });
+    }
+
     async getLatest() {
         const posts = await this.postsRepository.find({
             order: { createdAt: "DESC" },
@@ -21,16 +43,7 @@ export class PostsService {
             relations: {
                 author: true,
             },
-            select: {
-                id: true,
-                content: true,
-                createdAt: true,
-                updatedAt: true,
-                author: {
-                    id: true,
-                    name: true,
-                },
-            },
+            select: POST_SELECT_FILTER,
         });
 
         return posts;
@@ -62,16 +75,7 @@ export class PostsService {
             relations: {
                 author: true,
             },
-            select: {
-                id: true,
-                content: true,
-                createdAt: true,
-                updatedAt: true,
-                author: {
-                    id: true,
-                    name: true,
-                },
-            },
+            select: POST_SELECT_FILTER,
         });
     }
 }

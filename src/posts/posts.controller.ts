@@ -5,6 +5,7 @@ import {
     NotFoundException,
     Param,
     Post,
+    Query,
     Request,
     UseGuards,
 } from "@nestjs/common";
@@ -16,6 +17,24 @@ import { AuthenticatedUser } from "src/auth/dto/authenticated-user.dto";
 @Controller("posts")
 export class PostsController {
     constructor(private readonly postsService: PostsService) {}
+
+    @Get()
+    async getAll(
+        @Query("page") page: string = "1",
+        @Query("perPage") perPage: string = "10",
+    ) {
+        const newPage = Math.max(parseInt(page), 1);
+        const newPerPage = Math.max(Math.min(parseInt(perPage), 50), 1);
+        const posts = await this.postsService.getAll(newPage, newPerPage);
+
+        return {
+            pageInfo: {
+                page: newPage,
+                perPage: newPerPage,
+            },
+            posts,
+        };
+    }
 
     @Get("latest")
     async getLatest() {
