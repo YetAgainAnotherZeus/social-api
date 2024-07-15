@@ -55,4 +55,23 @@ export class PostsService {
 
         return await this.postsRepository.save(post);
     }
+
+    async getById(id: number) {
+        return await this.postsRepository.findOne({
+            where: { id },
+            relations: {
+                author: true,
+            },
+            select: {
+                id: true,
+                content: true,
+                createdAt: true,
+                updatedAt: true,
+                author: {
+                    id: true,
+                    name: true,
+                },
+            },
+        });
+    }
 }

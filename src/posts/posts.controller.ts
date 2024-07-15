@@ -2,6 +2,8 @@ import {
     Body,
     Controller,
     Get,
+    NotFoundException,
+    Param,
     Post,
     Request,
     UseGuards,
@@ -32,5 +34,22 @@ export class PostsController {
         const newPost = await this.postsService.newPost(user.sub, body);
 
         return newPost;
+    }
+
+    @Get(":id")
+    async getOne(@Param() params: any) {
+        const id = parseInt(params.id);
+
+        if (isNaN(id)) {
+            throw new NotFoundException();
+        }
+
+        const post = await this.postsService.getById(id);
+
+        if (!post) {
+            throw new NotFoundException();
+        }
+
+        return post;
     }
 }
