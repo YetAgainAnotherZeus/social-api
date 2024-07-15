@@ -1,26 +1,23 @@
-import { Post } from "src/posts/post.entity";
+import { User } from "src/users/user.entity";
 import {
     Entity,
     Column,
     PrimaryGeneratedColumn,
-    OneToMany,
-    CreateDateColumn,
+    ManyToOne,
     UpdateDateColumn,
+    CreateDateColumn,
 } from "typeorm";
 
 @Entity()
-export class User {
+export class Post {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ length: 32, unique: true })
-    name: string;
-
     @Column({ length: 255 })
-    password: string;
+    content: string;
 
-    @OneToMany(() => Post, (post) => post.author)
-    posts: Post[];
+    @ManyToOne(() => User, (user) => user.posts)
+    author: User;
 
     @CreateDateColumn()
     createdAt: Date;
