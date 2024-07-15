@@ -1,4 +1,8 @@
-import { Injectable } from "@nestjs/common";
+import {
+    Injectable,
+    NotFoundException,
+    UnauthorizedException,
+} from "@nestjs/common";
 import { Post } from "./post.entity";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
@@ -59,7 +63,7 @@ export class PostsService {
         });
 
         if (!user) {
-            return null;
+            throw new NotFoundException();
         }
 
         const post = new Post();
@@ -77,5 +81,25 @@ export class PostsService {
             },
             select: POST_SELECT_FILTER,
         });
+    }
+
+    async deletePost(id: number, userId: number) {
+        const post = await this.postsRepository.findOne({
+            where: { id },
+            relations: {
+                author: true,
+            },
+            select: POST_SELECT_FILTER,
+        });
+
+        if (!post) {
+            throw new NotFoundException();
+        }
+
+        if (post.author.id !== userId) {
+            throw new UnauthorizedException();
+        }
+
+        return await this.postsRepository.delete({ id });
     }
 }

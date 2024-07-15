@@ -71,4 +71,23 @@ export class PostsController {
 
         return post;
     }
+
+    @UseGuards(AuthGuard)
+    @Post(":id/delete")
+    async deletePost(
+        @Param() params: any,
+        @Request() req: Record<string, any>,
+    ) {
+        const userId: number = req.user.id;
+
+        const id = parseInt(params.id);
+
+        if (isNaN(id)) {
+            throw new NotFoundException();
+        }
+
+        await this.postsService.deletePost(id, userId);
+
+        return null;
+    }
 }
