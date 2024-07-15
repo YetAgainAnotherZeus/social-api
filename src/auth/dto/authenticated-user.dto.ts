@@ -1,4 +1,5 @@
 export class AuthenticatedUser {
-    id: number;
+    sub: number;
     name: string;
+    access_token: string;
 }
